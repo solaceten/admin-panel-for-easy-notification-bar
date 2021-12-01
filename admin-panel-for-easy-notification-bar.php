@@ -39,18 +39,18 @@ if ( ! class_exists( 'Admin_Panel_For_Easy_Notification_Bar' ) ) {
 		 * Class constructor.
 		 */
 		public function __construct() {
-			add_action( 'admin_menu', __CLASS__ . '::add_submenu_page' );
+			add_action( 'admin_menu', __CLASS__ . '::add_menu_page' );
 			add_action( 'admin_init', __CLASS__ . '::register_settings' );
 		}
 
 		/**
 		 * Add new admin page.
 		 */
-		public static function add_submenu_page() {
-			add_submenu_page(
-				'options-general.php',
-				'Easy Notification Bar',
-				'Easy Notification Bar',
+		public static function add_menu_page() {
+			add_menu_page(
+				//'options-general.php',
+				'Notification Bar',
+				'Notification Bar',
 				'edit_posts', // allow editor access.
 				'easy-notification-bar',
 				__CLASS__ . '::create_admin_page'
@@ -102,7 +102,24 @@ if ( ! class_exists( 'Admin_Panel_For_Easy_Notification_Bar' ) ) {
 				'easy_notification_bar_setting_section'
 			);
 
-		}
+		
+		
+		// Enqueue Color Picker
+    		//wp_enqueue_style( 'wp-color-picker' );
+			
+			// Add Background Color Field
+			add_settings_field( 
+			'background_color', 
+			esc_html__( 'Background Color', 'admin-panel-for-easy-notification-bar' ),
+				__CLASS__ . '::background_color_field',
+			'easy-notification-bar',
+			'easy_notification_bar_setting_section'
+			);
+	
+
+
+}
+
 
 		/**
 		 * Message field callback function.
@@ -116,7 +133,7 @@ if ( ! class_exists( 'Admin_Panel_For_Easy_Notification_Bar' ) ) {
 			}
 
 			?>
-			<textarea id="easy_notification_bar[message]" name="easy_notification_bar[message]"><?php echo wp_kses_post( $value ); ?></textarea>
+			<textarea id="easy_notification_bar[message]" name="easy_notification_bar[message]" rows="4" cols="50"><?php echo wp_kses_post( $value ); ?></textarea>
 		<?php }
 
 		/**
@@ -148,6 +165,26 @@ if ( ! class_exists( 'Admin_Panel_For_Easy_Notification_Bar' ) ) {
 			?>
 			<input id="easy_notification_bar[button_link]" name="easy_notification_bar[button_link]" value="<?php echo esc_attr( $value ); ?>">
 		<?php }
+		
+		
+		/**
+		 * BG Color field callback function.
+		 */
+		public static function background_color_field() {
+			$value = '';
+			$mods = get_theme_mod( 'easy_nb' );
+
+			if ( is_array( $mods ) && array_key_exists( 'background_color', $mods ) ) {
+				$value = $mods['background_color'];
+			}
+
+			?>
+			<input id="easy_notification_bar[background_color]" class="my-color-field" name="easy_notification_bar[background_color]" value="<?php echo esc_attr( $value ); ?>" data-default-color="#effeff">
+		<?php } 
+		
+		
+		 
+
 
 		/**
 		 * Settings section callback.
@@ -180,6 +217,12 @@ if ( ! class_exists( 'Admin_Panel_For_Easy_Notification_Bar' ) ) {
 			if ( array_key_exists( 'button_link', $options ) ) {
 				$mods['button_link'] = sanitize_text_field( $options['button_link'] );
 			}
+			
+			if ( array_key_exists( 'background_color', $options ) ) {
+				$mods['background_color'] = sanitize_text_field( $options['background_color'] );
+			}
+			
+			
 
 			set_theme_mod( 'easy_nb', $mods );
 
@@ -194,6 +237,7 @@ if ( ! class_exists( 'Admin_Panel_For_Easy_Notification_Bar' ) ) {
 
 			<div class="wrap">
 				<h1>Easy Notification Bar</h1>
+                <h3>some text</h3>
 
 				<form method="post" action="options.php">
 					<?php settings_fields( 'easy_notification_bar' ); ?>
@@ -216,4 +260,12 @@ if ( ! class_exists( 'Admin_Panel_For_Easy_Notification_Bar' ) ) {
 
 	Admin_Panel_For_Easy_Notification_Bar::instance();
 
+}
+
+add_action( 'admin_enqueue_scripts', 'mw_enqueue_color_picker' );
+function mw_enqueue_color_picker( $hook_suffix ) {
+    // first check that $hook_suffix is appropriate for your admin page
+    wp_enqueue_style( 'wp-color-picker' );
+	wp_enqueue_script( 'wp-color-picker');
+    wp_enqueue_script( 'my-script-handle', plugins_url('script.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
 }
