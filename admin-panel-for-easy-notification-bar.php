@@ -5,7 +5,7 @@
  * Description: Provides an admin panel for changing the easy notification bar text, button text and button link outside of the Customizer, with Admin and Editor role access.
  * Author: WPExplorer
  * Author URI: https://www.wpexplorer.com/
- * Version: 1.0
+ * Version: 999
  *
  * Text Domain: admin-panel-for-easy-notification-bar
  * Domain Path: /languages/
@@ -38,9 +38,6 @@ if ( ! class_exists( 'Admin_Panel_For_Easy_Notification_Bar' ) ) {
 		/**
 		 * Class constructor.
 		 */
-		
-		
-		// modification to allow Notifcation Bar to sit as top menu item
 		public function __construct() {
 			add_action( 'admin_menu', __CLASS__ . '::add_menu_page' );
 			add_action( 'admin_init', __CLASS__ . '::register_settings' );
@@ -105,22 +102,29 @@ if ( ! class_exists( 'Admin_Panel_For_Easy_Notification_Bar' ) ) {
 				'easy_notification_bar_setting_section'
 			);
 
-		
-		
-		// Enqueue Color Picker
-    		//wp_enqueue_style( 'wp-color-picker' );
 			
 			// Add Background Color Field
 			add_settings_field( 
-			'bg_color', 
-			esc_html__( 'Background Color', 'admin-panel-for-easy-notification-bar' ),
-				__CLASS__ . '::bg_color_field',
+			'background_color', 
+			esc_html__( 'Background Colour', 'admin-panel-for-easy-notification-bar' ),
+				__CLASS__ . '::background_color_field',
 			'easy-notification-bar',
 			'easy_notification_bar_setting_section'
 			);
 	
 
 
+			// Add TEXT Color Field
+			add_settings_field( 
+			'text_color', 
+			esc_html__( 'Text Colour', 'admin-panel-for-easy-notification-bar' ),
+				__CLASS__ . '::text_color_field',
+			'easy-notification-bar',
+			'easy_notification_bar_setting_section'
+			);
+			
+			
+			
 }
 
 
@@ -171,22 +175,35 @@ if ( ! class_exists( 'Admin_Panel_For_Easy_Notification_Bar' ) ) {
 		
 		
 		/**
-		 * BG Color field callback function.
+		 * Announcement BG Color field callback function.
 		 */
-		public static function bg_color_field() {
+		public static function background_color_field() {
 			$value = '';
 			$mods = get_theme_mod( 'easy_nb' );
 
-			if ( is_array( $mods ) && array_key_exists( 'bg_color', $mods ) ) {
-				$value = $mods['bg_color'];
+			if ( is_array( $mods ) && array_key_exists( 'background_color', $mods ) ) {
+				$value = $mods['background_color'];
 			}
 
 			?>
-			<input id="easy_notification_bar[bg_color]" class="my-color-field" name="easy_notification_bar[bg_color]" value="<?php echo esc_attr( $value ); ?>" data-default-color="#effeff">
+			<input id="easy_notification_bar[background_color]" class="my-color-field" name="easy_notification_bar[background_color]" value="<?php echo esc_attr( $value ); ?>" data-default-color="#effeff">
 		<?php } 
 		
 		
-		 
+		 /**
+		 * Announcement Text Color field callback function.
+		 */
+		public static function text_color_field() {
+			$value = '';
+			$mods = get_theme_mod( 'easy_nb' );
+
+			if ( is_array( $mods ) && array_key_exists( 'text_color', $mods ) ) {
+				$value = $mods['text_color'];
+			}
+
+			?>
+			<input id="easy_notification_bar[text_color]" class="my-color-field" name="easy_notification_bar[text_color]" value="<?php echo esc_attr( $value ); ?>" data-default-color="#000000">
+		<?php } 
 
 
 		/**
@@ -221,10 +238,13 @@ if ( ! class_exists( 'Admin_Panel_For_Easy_Notification_Bar' ) ) {
 				$mods['button_link'] = sanitize_text_field( $options['button_link'] );
 			}
 			
-			if ( array_key_exists( 'bg_color', $options ) ) {
-				$mods['bg_color'] = sanitize_text_field( $options['bg_color'] );
+			if ( array_key_exists( 'background_color', $options ) ) {
+				$mods['background_color'] = sanitize_hex_color( $options['background_color'] );
 			}
 			
+			if ( array_key_exists( 'text_color', $options ) ) {
+				$mods['text_color'] = sanitize_hex_color( $options['text_color'] );
+			}
 			
 
 			set_theme_mod( 'easy_nb', $mods );
@@ -265,11 +285,10 @@ if ( ! class_exists( 'Admin_Panel_For_Easy_Notification_Bar' ) ) {
 
 }
 
-// add color picker
 add_action( 'admin_enqueue_scripts', 'mw_enqueue_color_picker' );
 function mw_enqueue_color_picker( $hook_suffix ) {
     // first check that $hook_suffix is appropriate for your admin page
     wp_enqueue_style( 'wp-color-picker' );
 	wp_enqueue_script( 'wp-color-picker');
-    wp_enqueue_script( 'my-script-handle', plugins_url('script.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
+    wp_enqueue_script( 'my-script-handle', plugins_url('pdd-script.js', __FILE__ ), array( 'wp-color-picker' ), false, true );
 }
